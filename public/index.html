@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>สต็อกอุปกรณ์ IT</title>
+  <script type="module" src="app.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<h2>เพิ่มอุปกรณ์ใหม่</h2>
+
+<label>เลือกบริษัท:</label>
+<select id="companySelect">
+  <option value=""disabled selected>กรุณาเลือกบริษัท</option>
+  <option value="swp">SWP</option>
+  <option value="esk">ESK</option>
+</select>
+
+<label>เลือกประเภท:</label>
+<select id="deviceType">
+  <option value=""disabled selected>กรุณาเลือกประเภท</option>
+  <option value="computer">คอมพิวเตอร์</option>
+  <option value="notebook">โน้ตบุ๊ก</option>
+</select>
+
+<!-- ฟอร์มจะแสดงเมื่อเลือกบริษัท + ประเภท -->
+<!-- ฟอร์มคอมพิวเตอร์ -->
+<form id="computerForm" style="display: none;">
+  <h3>ฟอร์มคอมพิวเตอร์</h3>
+  <input type="text" id="c_barCode" placeholder="Barcode">
+  <input type="text" id="c_assetCode" placeholder="รหัสทรัพย์สิน">
+  <input type="text" id="c_name" placeholder="ชื่อผู้ใช้">
+  <input type="text" id="c_department" placeholder="แผนก">
+  <input type="text" id="c_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="c_serialNumber" placeholder="SN">
+  <input type="date" id="c_purchaseDate">
+  <input type="date" id="c_warrantyExpire">
+  <input type="text" id="c_warrantyPeriod" placeholder="ประกัน">
+  <input type="text" id="c_shop" placeholder="ซื้อจาก">
+  <input type="text" id="c_contactNumber" placeholder="เบอร์ติดต่อ">
+  <input type="text" id="c_comment" placeholder="หมายเหตุ">
+  <button type="submit">บันทึกคอมพิวเตอร์</button>
+</form>
+
+<!-- ฟอร์มโน้ตบุ๊ก -->
+<form id="notebookForm" style="display: none;">
+  <h3>ฟอร์มโน้ตบุ๊ก</h3>
+  <input type="text" id="c_barCode" placeholder="Barcode">
+  <input type="text" id="n_assetCode" placeholder="รหัสทรัพย์สิน">
+  <input type="text" id="n_name" placeholder="ชื่อผู้ใช้">
+  <input type="text" id="n_department" placeholder="แผนก">
+  <input type="text" id="n_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="n_serialNumber" placeholder="SN">
+  <input type="date" id="n_purchaseDate">
+  <input type="date" id="n_warrantyExpire">
+  <input type="text" id="n_warrantyPeriod" placeholder="ประกัน">
+  <input type="text" id="n_shop" placeholder="ซื้อจาก">
+  <input type="text" id="n_contactNumber" placeholder="เบอร์ติดต่อ">
+  <input type="text" id="n_comment" placeholder="หมายเหตุ">
+  <button type="submit">บันทึกโน้ตบุ๊ก</button>
+</form>
+
+<hr>
+<h3>รายการอุปกรณ์</h3>
+
+<label>กรองตามบริษัท:</label>
+<select id="filterCompany">
+  <option value=""disabled selected>เลือกบริษัท</option>
+  <option value="all">ทั้งหมด</option>
+  <option value="swp">SWP</option>
+  <option value="esk">ESK</option>
+</select>
+
+<label>กรองตามประเภท:</label>
+<select id="filterType">
+  <option value=""disabled selected>เลือกประเภท</option>
+  <option value="all">ทั้งหมด</option>
+  <option value="computer">คอมพิวเตอร์</option>
+  <option value="notebook">โน้ตบุ๊ก</option>
+</select>
+
+<label for="filterbarCode">ค้นหา BarCode:</label>
+<input type="text" id="filterbarCode">
+<label for="filterAssetCode">ค้นหารหัสทรัพย์สิน:</label>
+<input type="text" id="filterAssetCode">
+<label for="filterName">ค้นหาชื่อ:</label>
+<input type="text" id="filterName">
+<label for="filterDept">ค้นหาแผนก:</label>
+<input type="text" id="filterDept">
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>ลำดับ</th>
+      <th>BarCode</th>
+      <th>รหัสทรัพย์สิน</th>
+      <th>ชื่อผู้ใช้</th>
+      <th>แผนก</th>
+      <th>ชื่ออุปกรณ์</th>
+      <th>SN</th>
+      <th>วันที่ซื้อ</th>
+      <th>วันหมดอายุประกัน</th>
+      <th>ประกัน/ปี</th>
+      <th>ซื้อจาก</th>
+      <th>เบอร์ติดต่อ</th>
+      <th>บริษัท</th>
+      <th>หมายเหตุ</th>
+      <th>จัดการ</th>
+    </tr>
+  </thead>
+  <tbody id="deviceList"></tbody>
+</table>
+<script type="module" src="app.js"></script>
+
+</body>
+
+</html>
