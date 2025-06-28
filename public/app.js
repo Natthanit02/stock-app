@@ -76,20 +76,30 @@ computerForm.addEventListener("submit", async (e) => {
     status: "available"
   };
 
-  if (!isEditing) {
-    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+if (!isEditing) {
+  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+  if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+  await addDoc(getCollectionByCompany(company), data);
+  alert("บันทึกเรียบร้อยแล้ว");
+} else {
+  const oldCompanyCollection = currentEditCollection;
+  const newCompanyCollection = getCollectionByCompany(company).path;
+
+  if (oldCompanyCollection !== newCompanyCollection) {
+    await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
     await addDoc(getCollectionByCompany(company), data);
   } else {
-    await updateDoc(doc(db, currentEditCollection, currentEditId), data);
-    isEditing = false;
-    currentEditId = null;
-    currentEditCollection = null;
-    computerForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
+    await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
   }
-  alert("บันทึกข้อมูลเรียบร้อยแล้ว");
-  computerForm.reset();
-  loadFilteredData();
+
+  alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+
+  isEditing = false;
+  currentEditId = null;
+  currentEditCollection = null;
+  computerForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
+}
+
 });
 
 // <---------- notebook ---------->
@@ -115,20 +125,29 @@ notebookForm.addEventListener("submit", async (e) => {
     status: "available"
   };
 
-  if (!isEditing) {
-    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+if (!isEditing) {
+  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+  if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+  await addDoc(getCollectionByCompany(company), data);
+  alert("บันทึกเรียบร้อยแล้ว");
+} else {
+  const oldCompanyCollection = currentEditCollection;
+  const newCompanyCollection = getCollectionByCompany(company).path;
+
+  if (oldCompanyCollection !== newCompanyCollection) {
+    await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
     await addDoc(getCollectionByCompany(company), data);
   } else {
-    await updateDoc(doc(db, currentEditCollection, currentEditId), data);
-    isEditing = false;
-    currentEditId = null;
-    currentEditCollection = null;
-    notebookForm.querySelector("button[type='submit']").textContent = "บันทึกโน้ตบุ๊ก";
+    await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
   }
-  alert("บันทึกข้อมูลเรียบร้อยแล้ว");
-  notebookForm.reset();
-  loadFilteredData();
+
+  alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+
+  isEditing = false;
+  currentEditId = null;
+  currentEditCollection = null;
+  notebookForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
+}
 });
 
 // <---------- telephone ---------->
@@ -157,20 +176,30 @@ telephoneForm.addEventListener("submit", async (e) => {
     status: "available"
   };
 
-  if (!isEditing) {
-    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+if (!isEditing) {
+  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+  if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+  await addDoc(getCollectionByCompany(company), data);
+  alert("บันทึกเรียบร้อยแล้ว");
+} else {
+  const oldCompanyCollection = currentEditCollection;
+  const newCompanyCollection = getCollectionByCompany(company).path;
+
+  if (oldCompanyCollection !== newCompanyCollection) {
+    await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
     await addDoc(getCollectionByCompany(company), data);
   } else {
-    await updateDoc(doc(db, currentEditCollection, currentEditId), data);
-    isEditing = false;
-    currentEditId = null;
-    currentEditCollection = null;
-    telephoneForm.querySelector("button[type='submit']").textContent = "บันทึกโทรศัพท์";
+    await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
   }
-  alert("บันทึกข้อมูลเรียบร้อยแล้ว");
-  telephoneForm.reset();
-  loadFilteredData();
+
+  alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+
+  isEditing = false;
+  currentEditId = null;
+  currentEditCollection = null;
+  telephoneForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
+}
+
 });
 
 
@@ -292,7 +321,14 @@ async function loadFilteredData() {
   }
 }
 
-//------------- ปุ่มลบ แก้ไข -------------
+window.deleteItem = async (colName, id) => {
+  if (confirm("ยืนยันการลบใช่หรือไม่?")) {
+    await deleteDoc(doc(db, colName, id));
+    loadFilteredData();
+  }
+};
+
+//------------- แก้ไข -------------
 window.editItem = async (colName, docId) => {
   const snap = await getDoc(doc(db, colName, docId));
   if (!snap.exists()) return alert("ไม่พบข้อมูล");
@@ -344,4 +380,5 @@ window.editItem = async (colName, docId) => {
     telephoneForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
   }
 };
+
 
