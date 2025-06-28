@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <title>สต็อกอุปกรณ์ IT</title>
-  <script type="module" src="app.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -18,11 +17,13 @@
   <option value="esk">ESK</option>
 </select>
 
+<!-- เพิ่มใน deviceType -->
 <label>เลือกประเภท:</label>
 <select id="deviceType">
   <option value=""disabled selected>กรุณาเลือกประเภท</option>
   <option value="computer">คอมพิวเตอร์</option>
   <option value="notebook">โน้ตบุ๊ก</option>
+  <option value="telephone">โทรศัพท์</option> 
 </select>
 
 <!-- ฟอร์มจะแสดงเมื่อเลือกบริษัท + ประเภท -->
@@ -47,11 +48,12 @@
 <!-- ฟอร์มโน้ตบุ๊ก -->
 <form id="notebookForm" style="display: none;">
   <h3>ฟอร์มโน้ตบุ๊ก</h3>
-  <input type="text" id="c_barCode" placeholder="Barcode">
+  <input type="text" id="n_barCode" placeholder="Barcode">
   <input type="text" id="n_assetCode" placeholder="รหัสทรัพย์สิน">
   <input type="text" id="n_name" placeholder="ชื่อผู้ใช้">
   <input type="text" id="n_department" placeholder="แผนก">
   <input type="text" id="n_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="n_model" placeholder="Model">
   <input type="text" id="n_serialNumber" placeholder="SN">
   <input type="date" id="n_purchaseDate">
   <input type="date" id="n_warrantyExpire">
@@ -60,6 +62,27 @@
   <input type="text" id="n_contactNumber" placeholder="เบอร์ติดต่อ">
   <input type="text" id="n_comment" placeholder="หมายเหตุ">
   <button type="submit">บันทึกโน้ตบุ๊ก</button>
+</form>
+
+<!-- โทรศัพท์ -->
+<form id="telephoneForm" style="display: none;">
+  <h3>ฟอร์มโทรศัพท์</h3>
+  <input type="text" id="t_barCode" placeholder="Barcode">
+  <input type="text" id="t_assetCode" placeholder="รหัสทรัพย์สิน">
+  <input type="text" id="t_name" placeholder="ชื่อผู้ใช้">
+  <input type="text" id="t_department" placeholder="แผนก">
+  <input type="text" id="t_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="t_netWork" placeholder="เครื่อข่าย">
+  <input type="text" id="t_teleNumber" placeholder="เบอร์โทร">
+  <input type="text" id="t_serialNumber" placeholder="SN">
+  <input type="date" id="t_purchaseDate">
+  <input type="date" id="t_warrantyExpire">
+  <input type="text" id="t_warrantyPeriod" placeholder="ประกัน">
+  <input type="text" id="t_shop" placeholder="ซื้อจาก">
+  <input type="text" id="t_simais" placeholder="SIM AIS">
+  <input type="text" id="t_contactNumber" placeholder="เบอร์ติดต่อ">
+  <input type="text" id="t_comment" placeholder="หมายเหตุ">
+  <button type="submit">บันทึกโทรศัพท์</button>
 </form>
 
 <hr>
@@ -79,6 +102,7 @@
   <option value="all">ทั้งหมด</option>
   <option value="computer">คอมพิวเตอร์</option>
   <option value="notebook">โน้ตบุ๊ก</option>
+  <option value="telephone">โทรศัพท์</option>
 </select>
 
 <label for="filterbarCode">ค้นหา BarCode:</label>
@@ -93,21 +117,6 @@
 <table border="1">
   <thead>
     <tr>
-      <th>ลำดับ</th>
-      <th>BarCode</th>
-      <th>รหัสทรัพย์สิน</th>
-      <th>ชื่อผู้ใช้</th>
-      <th>แผนก</th>
-      <th>ชื่ออุปกรณ์</th>
-      <th>SN</th>
-      <th>วันที่ซื้อ</th>
-      <th>วันหมดอายุประกัน</th>
-      <th>ประกัน/ปี</th>
-      <th>ซื้อจาก</th>
-      <th>เบอร์ติดต่อ</th>
-      <th>บริษัท</th>
-      <th>หมายเหตุ</th>
-      <th>จัดการ</th>
     </tr>
   </thead>
   <tbody id="deviceList"></tbody>

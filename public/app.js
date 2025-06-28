@@ -5,27 +5,40 @@ import {
   deleteDoc,
   doc,
   onSnapshot,
-  getDoc, 
+  getDoc,
   getDocs,
   updateDoc,
-  query,           // ✅ เพิ่มตรงนี้
-  where,           // ✅ และตรงนี้
-  Timestamp        // ✅ สำหรับใช้เวลา
+  query,
+  where,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const companySelect = document.getElementById("companySelect");
 const deviceTypeSelect = document.getElementById("deviceType");
 const computerForm = document.getElementById("computerForm");
 const notebookForm = document.getElementById("notebookForm");
+const telephoneForm = document.getElementById("telephoneForm");
+
 let isEditing = false;
 let currentEditId = null;
 let currentEditCollection = null;
+
+function toTimestamp(dateStr) {
+  if (!dateStr) return null;
+  return Timestamp.fromDate(new Date(dateStr));
+}
+
+function getCollectionByCompany(company) {
+  if (company === "swp") return collection(db, "devices_swp");
+  if (company === "esk") return collection(db, "devices_esk");
+  throw new Error("ไม่พบบริษัท");
+}
 
 async function checkDuplicateAssetCode(company, assetCode) {
   const colRef = getCollectionByCompany(company);
   const q = query(colRef, where("assetCode", "==", assetCode));
   const snap = await getDocs(q);
-  return !snap.empty; // true = พบข้อมูลซ้ำ
+  return !snap.empty;
 }
 
 companySelect.addEventListener("change", toggleForms);
@@ -35,28 +48,13 @@ function toggleForms() {
   const type = deviceTypeSelect.value;
   const company = companySelect.value;
 
-  if (!type || !company) {
-    computerForm.style.display = "none";
-    notebookForm.style.display = "none";
-    return;
-  }
-
-  computerForm.style.display = type === "computer" ? "block" : "none";
-  notebookForm.style.display = type === "notebook" ? "block" : "none";
+  computerForm.style.display = (type === "computer" && company) ? "block" : "none";
+  notebookForm.style.display = (type === "notebook" && company) ? "block" : "none";
+  telephoneForm.style.display = (type === "telephone" && company)? "block" : "none";
 }
 
-function getCollectionByCompany(company) {
-  if (company === "swp") return collection(db, "devices_swp");
-  if (company === "esk") return collection(db, "devices_esk");
-  throw new Error("ไม่พบบริษัท");
-}
-
-  function toTimestamp(dateStr) {
-  if (!dateStr) return null; // ป้องกัน error ถ้ายังไม่เลือกวันที่
-  return Timestamp.fromDate(new Date(dateStr));
-  }
-
-//------------------------------------------------------------computer----------------------------------------------------
+//-------------------------------------------event listener--------------------------------------------------------
+// <---------- computer ---------->
 computerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const company = companySelect.value;
@@ -74,41 +72,30 @@ computerForm.addEventListener("submit", async (e) => {
     shop: document.getElementById("c_shop").value.trim(),
     contactNumber: document.getElementById("c_contactNumber").value.trim(),
     comment: document.getElementById("c_comment").value.trim(),
-    company: company,
+    company,
     status: "available"
   };
 
   if (!isEditing) {
-  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-  if (isDuplicate) {
-    alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
-    return;
-  }
-  await addDoc(getCollectionByCompany(company), data);
-}
-
-  if (isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+    await addDoc(getCollectionByCompany(company), data);
+  } else {
     await updateDoc(doc(db, currentEditCollection, currentEditId), data);
-    alert("อัปเดตข้อมูลคอมพิวเตอร์แล้ว");
     isEditing = false;
     currentEditId = null;
     currentEditCollection = null;
     computerForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
-  } else {
-    await addDoc(getCollectionByCompany(company), data);
-    alert("บันทึกคอมพิวเตอร์แล้ว");
   }
-
+  alert("บันทึกข้อมูลเรียบร้อยแล้ว");
   computerForm.reset();
   loadFilteredData();
 });
-//------------------------------------------------------------computer----------------------------------------------------
 
-//------------------------------------------------------------notebook----------------------------------------------------
+// <---------- notebook ---------->
 notebookForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const company = companySelect.value;
-
   const data = {
     type: "notebook",
     barCode: document.getElementById("n_barCode").value.trim(),
@@ -116,6 +103,7 @@ notebookForm.addEventListener("submit", async (e) => {
     name: document.getElementById("n_name").value.trim(),
     department: document.getElementById("n_department").value.trim(),
     deviceName: document.getElementById("n_deviceName").value.trim(),
+    model: document.getElementById("n_model").value.trim(),
     serialNumber: document.getElementById("n_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("n_purchaseDate").value),
     warrantyExpire: toTimestamp(document.getElementById("n_warrantyExpire").value),
@@ -123,100 +111,167 @@ notebookForm.addEventListener("submit", async (e) => {
     shop: document.getElementById("n_shop").value.trim(),
     contactNumber: document.getElementById("n_contactNumber").value.trim(),
     comment: document.getElementById("n_comment").value.trim(),
-    company: company,
+    company,
     status: "available"
   };
 
-  if (isEditing) {
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+    await addDoc(getCollectionByCompany(company), data);
+  } else {
     await updateDoc(doc(db, currentEditCollection, currentEditId), data);
-    alert("อัปเดตข้อมูลโน้ตบุ๊กแล้ว");
     isEditing = false;
     currentEditId = null;
     currentEditCollection = null;
     notebookForm.querySelector("button[type='submit']").textContent = "บันทึกโน้ตบุ๊ก";
-  } else {
-    await addDoc(getCollectionByCompany(company), data);
-    alert("บันทึกโน้ตบุ๊กแล้ว");
   }
-
+  alert("บันทึกข้อมูลเรียบร้อยแล้ว");
   notebookForm.reset();
   loadFilteredData();
 });
-//------------------------------------------------------------notebook----------------------------------------------------
 
-//------------------------------------------------------------แสดงข้อมูลในตาราง----------------------------------------------------
+// <---------- telephone ---------->
+telephoneForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const company = companySelect.value;
+
+  const data = {
+    type: "telephone",
+    barCode: document.getElementById("t_barCode").value.trim(),
+    assetCode: document.getElementById("t_assetCode").value.trim(),
+    name: document.getElementById("t_name").value.trim(),
+    department: document.getElementById("t_department").value.trim(),
+    deviceName: document.getElementById("t_deviceName").value.trim(),
+    netWork: document.getElementById("t_netWork").value.trim(),
+    teleNumber: document.getElementById("t_teleNumber").value.trim(),
+    serialNumber: document.getElementById("t_serialNumber").value.trim(),
+    purchaseDate: toTimestamp(document.getElementById("t_purchaseDate").value),
+    warrantyExpire: toTimestamp(document.getElementById("t_warrantyExpire").value),
+    warrantyPeriod: document.getElementById("t_warrantyPeriod").value.trim(),
+    shop: document.getElementById("t_shop").value.trim(),
+    simais: document.getElementById("t_simais").value.trim(),
+    contactNumber: document.getElementById("t_contactNumber").value.trim(),
+    comment: document.getElementById("t_comment").value.trim(),
+    company,
+    status: "available"
+  };
+
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+    await addDoc(getCollectionByCompany(company), data);
+  } else {
+    await updateDoc(doc(db, currentEditCollection, currentEditId), data);
+    isEditing = false;
+    currentEditId = null;
+    currentEditCollection = null;
+    telephoneForm.querySelector("button[type='submit']").textContent = "บันทึกโทรศัพท์";
+  }
+  alert("บันทึกข้อมูลเรียบร้อยแล้ว");
+  telephoneForm.reset();
+  loadFilteredData();
+});
+
+
+//-------------------------------------------event listener--------------------------------------------------------
 
 const filterCompany = document.getElementById("filterCompany");
 const filterType = document.getElementById("filterType");
-
 const filterName = document.getElementById("filterName");
 const filterDept = document.getElementById("filterDept");
 const filterAssetCode = document.getElementById("filterAssetCode");
 const filterbarCode = document.getElementById("filterbarCode");
 
-
-filterCompany.addEventListener("change", loadFilteredData);
-filterType.addEventListener("change", loadFilteredData);
-
-filterName.addEventListener("input", loadFilteredData);
-filterDept.addEventListener("input", loadFilteredData);
-filterAssetCode.addEventListener("input", loadFilteredData);
-filterbarCode.addEventListener("input", loadFilteredData);
+[filterCompany, filterType, filterName, filterDept, filterAssetCode, filterbarCode].forEach(el => el.addEventListener("input", loadFilteredData));
 
 async function loadFilteredData() {
   const type = filterType.value;
   const company = filterCompany.value;
-
   const list = document.getElementById("deviceList");
+  const thead = document.querySelector("thead tr");
   list.innerHTML = "";
 
-  const collectionsToSearch = [];
+  if (type === "notebook") {
+  thead.innerHTML = `
+    <th>ลำดับ</th>
+    <th>BarCode</th>
+    <th>รหัสทรัพย์สิน</th>
+    <th>ชื่อผู้ใช้</th>
+    <th>แผนก</th>
+    <th>ชื่ออุปกรณ์</th>
+    <th>Model</th>
+    <th>SN</th>
+    <th>วันที่ซื้อ</th>
+    <th>วันหมดอายุประกัน</th>
+    <th>ประกัน/ปี</th>
+    <th>ซื้อจาก</th>
+    <th>เบอร์ติดต่อ</th>
+    <th>บริษัท</th>
+    <th>หมายเหตุ</th>
+    <th>จัดการ</th>`;
+} else if (type === "telephone") {
+  thead.innerHTML = `
+    <th>ลำดับ</th>
+    <th>BarCode</th>
+    <th>รหัสทรัพย์สิน</th>
+    <th>ชื่อผู้ใช้</th>
+    <th>แผนก</th>
+    <th>ชื่ออุปกรณ์</th>
+    <th>เบอร์โทร</th>
+    <th>SN</th>
+    <th>วันที่ซื้อ</th>
+    <th>วันหมดอายุประกัน</th>
+    <th>ประกัน/ปี</th>
+    <th>ซื้อจาก</th>
+    <th>เบอร์ติดต่อ</th>
+    <th>บริษัท</th>
+    <th>หมายเหตุ</th>
+    <th>จัดการ</th>`;
+} else {
+  thead.innerHTML = `
+    <th>ลำดับ</th>
+    <th>BarCode</th>
+    <th>รหัสทรัพย์สิน</th>
+    <th>ชื่อผู้ใช้</th>
+    <th>แผนก</th>
+    <th>ชื่ออุปกรณ์</th>
+    <th>SN</th>
+    <th>วันที่ซื้อ</th>
+    <th>วันหมดอายุประกัน</th>
+    <th>ประกัน/ปี</th>
+    <th>ซื้อจาก</th>
+    <th>เบอร์ติดต่อ</th>
+    <th>บริษัท</th>
+    <th>หมายเหตุ</th>
+    <th>จัดการ</th>`;
+}
 
-  if (company === "all") {
-    collectionsToSearch.push("devices_swp", "devices_esk");
-  } else {
-    collectionsToSearch.push(`devices_${company}`);
-  }
+  const collectionsToSearch = company === "all" ? ["devices_swp", "devices_esk"] : [`devices_${company}`];
 
   let index = 1;
   for (const col of collectionsToSearch) {
-    const colRef = collection(db, col);
-    const snapshot = await getDocs(colRef);
-
+    const snapshot = await getDocs(collection(db, col));
     snapshot.forEach(docSnap => {
       const d = docSnap.data();
-
-       // กรองตาม type
       if (type !== "all" && d.type !== type) return;
 
-      // ✅ กรองตาม barcode
-      const BarcodeFilter = filterbarCode.value.trim().toLowerCase();
-      if (BarcodeFilter && !d.barCode?.toLowerCase().includes(BarcodeFilter)) return;
+      if (filterbarCode.value && !d.barCode?.toLowerCase().includes(filterbarCode.value.toLowerCase())) return;
+      if (filterAssetCode.value && !d.assetCode?.toLowerCase().includes(filterAssetCode.value.toLowerCase())) return;
+      if (filterName.value && !d.name?.toLowerCase().includes(filterName.value.toLowerCase())) return;
+      if (filterDept.value && !d.department?.toLowerCase().includes(filterDept.value.toLowerCase())) return;
 
-      // ✅ กรองตามรหัสทรัพย์สิน
-      const assetCodeFilter = filterAssetCode.value.trim().toLowerCase();
-      if (assetCodeFilter && !d.assetCode?.toLowerCase().includes(assetCodeFilter)) return;
-
-      // ✅ กรองตามชื่อ
-      const nameFilter = filterName.value.trim().toLowerCase();
-      if (nameFilter && !d.name?.toLowerCase().includes(nameFilter)) return;
-
-      // ✅ กรองตามแผนก (ถ้ามี)
-      const deptFilter = filterDept.value.trim().toLowerCase();
-      if (deptFilter && !d.department?.toLowerCase().includes(deptFilter)) return;
-      
-      // แปลง timestamp เป็นวันที่ readable
       const purchase = d.purchaseDate?.toDate().toLocaleDateString("th-TH") || "-";
       const warranty = d.warrantyExpire?.toDate().toLocaleDateString("th-TH") || "-";
-
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${index++}</td>
-        <td>${d.barCode || ""}</td>
+        <td>${d.barCode || "-"}</td>
         <td>${d.assetCode}</td>
         <td>${d.name}</td>
         <td>${d.department}</td>
         <td>${d.deviceName}</td>
+        ${type === "notebook" ? `<td>${d.model || "-"}</td>` : ""}
         <td>${d.serialNumber}</td>
         <td>${purchase}</td>
         <td>${warranty}</td>
@@ -225,70 +280,65 @@ async function loadFilteredData() {
         <td>${d.contactNumber}</td>
         <td>${d.company.toUpperCase()}</td>
         <td>${d.comment}</td>
-        <td>  <button onclick="editItem('${col}', '${docSnap.id}')">แก้ไข</button>
-              <button onclick="deleteItem('${col}', '${docSnap.id}')">ลบ</button>
-        </td>
-      ` ;
+        <td>
+          <button onclick="editItem('${col}', '${docSnap.id}')">แก้ไข</button>
+          <button onclick="deleteItem('${col}', '${docSnap.id}')">ลบ</button>
+        </td>`;
       list.appendChild(tr);
     });
   }
 }
 
-window.deleteItem = async (colName, id) => {
-  await deleteDoc(doc(db, colName, id));
-  loadFilteredData();
-};
-
-
-// ฟังก์ชันลบข้อมูล
-window.deleteComputer = async (id) => {
-  if (confirm("ยืนยันการลบข้อมูลนี้ใช่หรือไม่?")) {
-    await deleteDoc(doc(db, "computers", id));
-  }
-};
-//------------------------------------------------------------แสดงข้อมูลในตาราง----------------------------------------------------
-
-//------------------------------------------------------------แก้ไขข้อมูล----------------------------------------------------
+//------------- ปุ่มลบ แก้ไข -------------
 window.editItem = async (colName, docId) => {
-  const docRef = doc(db, colName, docId);
-  const snap = await getDoc(docRef);
+  const snap = await getDoc(doc(db, colName, docId));
   if (!snap.exists()) return alert("ไม่พบข้อมูล");
-
   const d = snap.data();
 
+  deviceTypeSelect.value = d.type;
+  companySelect.value = d.company;
+  toggleForms();
+
+  isEditing = true;
   currentEditId = docId;
   currentEditCollection = colName;
-  isEditing = true;
 
-  // ใส่ข้อมูลเข้า form
-  if (d.type === "computer") {
-    deviceTypeSelect.value = "computer";
-    companySelect.value = d.company;
-    toggleForms();
+  if (d.type === "computer" || d.type === "notebook") {
+    const prefix = d.type === "computer" ? "c" : "n";
+    document.getElementById(`${prefix}_assetCode`).value = d.assetCode;
+    document.getElementById(`${prefix}_name`).value = d.name;
+    document.getElementById(`${prefix}_deviceName`).value = d.deviceName;
+    document.getElementById(`${prefix}_serialNumber`).value = d.serialNumber;
+    document.getElementById(`${prefix}_purchaseDate`).value = d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById(`${prefix}_warrantyExpire`).value = d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById(`${prefix}_warrantyPeriod`).value = d.warrantyPeriod || "";
+    document.getElementById(`${prefix}_shop`).value = d.shop || "";
+    document.getElementById(`${prefix}_contactNumber`).value = d.contactNumber || "";
+    document.getElementById(`${prefix}_comment`).value = d.comment || "";
 
-    document.getElementById("c_assetCode").value = d.assetCode;
-    document.getElementById("c_name").value = d.name;
-    document.getElementById("c_deviceName").value = d.deviceName;
-    document.getElementById("c_serialNumber").value = d.serialNumber;
-    document.getElementById("c_cpu").value = d.cpu || "";
-    document.getElementById("c_ram").value = d.ram || "";
+    if (d.type === "notebook") {
+      document.getElementById("n_model").value = d.model || "";
+    }
 
-    // เปลี่ยนปุ่ม
-    computerForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
+    const form = d.type === "computer" ? computerForm : notebookForm;
+    form.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
 
-  } else if (d.type === "notebook") {
-    deviceTypeSelect.value = "notebook";
-    companySelect.value = d.company;
-    toggleForms();
+  } else if (d.type === "telephone") {
+    document.getElementById("t_assetCode").value = d.assetCode;
+    document.getElementById("t_name").value = d.name;
+    document.getElementById("t_deviceName").value = d.deviceName;
+    document.getElementById("t_netWork").value = d.netWork || "";
+    document.getElementById("t_telNumber").value = d.teleNumber || "";
+    document.getElementById("t_serialNumber").value = d.serialNumber;
+    document.getElementById("t_purchaseDate").value = d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById("t_warrantyExpire").value = d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById("t_warrantyPeriod").value = d.warrantyPeriod || "";
+    document.getElementById("t_shop").value = d.shop || "";
+    document.getElementById("t_simais").value = d.simais || "";
+    document.getElementById("t_contactNumber").value = d.contactNumber || "";
+    document.getElementById("t_comment").value = d.comment || "";
 
-    document.getElementById("n_assetCode").value = d.assetCode;
-    document.getElementById("n_name").value = d.name;
-    document.getElementById("n_deviceName").value = d.deviceName;
-    document.getElementById("n_serialNumber").value = d.serialNumber;
-    document.getElementById("n_screenSize").value = d.screenSize || "";
-    document.getElementById("n_battery").value = d.battery || "";
-
-    notebookForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
+    telephoneForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
   }
 };
-//------------------------------------------------------------แก้ไขข้อมูล----------------------------------------------------
+
