@@ -218,6 +218,7 @@ async function loadFilteredData() {
     <th>ชื่อผู้ใช้</th>
     <th>แผนก</th>
     <th>ชื่ออุปกรณ์</th>
+    <th>เครือข่าย</th>
     <th>เบอร์โทร</th>
     <th>SN</th>
     <th>วันที่ซื้อ</th>
@@ -270,7 +271,9 @@ async function loadFilteredData() {
         <td>${d.assetCode}</td>
         <td>${d.name}</td>
         <td>${d.department}</td>
-        <td>${d.deviceName}</td>
+        <td>${d.deviceName}</td>  
+        ${type === "telephone" ? `<td>${d.netWork || "-"}</td>` : ""}
+        ${type === "telephone" ? `<td>${d.teleNumber || "-"}</td>` : ""}
         ${type === "notebook" ? `<td>${d.model || "-"}</td>` : ""}
         <td>${d.serialNumber}</td>
         <td>${purchase}</td>
