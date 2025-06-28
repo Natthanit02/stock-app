@@ -1,4 +1,4 @@
-import { db } from './firebaseConfig.js';
+import { db } from "./firebaseConfig.js";
 import {
   collection,
   addDoc,
@@ -10,7 +10,7 @@ import {
   updateDoc,
   query,
   where,
-  Timestamp
+  Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const companySelect = document.getElementById("companySelect");
@@ -48,9 +48,12 @@ function toggleForms() {
   const type = deviceTypeSelect.value;
   const company = companySelect.value;
 
-  computerForm.style.display = (type === "computer" && company) ? "block" : "none";
-  notebookForm.style.display = (type === "notebook" && company) ? "block" : "none";
-  telephoneForm.style.display = (type === "telephone" && company)? "block" : "none";
+  computerForm.style.display =
+    type === "computer" && company ? "block" : "none";
+  notebookForm.style.display =
+    type === "notebook" && company ? "block" : "none";
+  telephoneForm.style.display =
+    type === "telephone" && company ? "block" : "none";
 }
 
 //-------------------------------------------event listener--------------------------------------------------------
@@ -67,39 +70,42 @@ computerForm.addEventListener("submit", async (e) => {
     deviceName: document.getElementById("c_deviceName").value.trim(),
     serialNumber: document.getElementById("c_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("c_purchaseDate").value),
-    warrantyExpire: toTimestamp(document.getElementById("c_warrantyExpire").value),
+    warrantyExpire: toTimestamp(
+      document.getElementById("c_warrantyExpire").value
+    ),
     warrantyPeriod: document.getElementById("c_warrantyPeriod").value.trim(),
     shop: document.getElementById("c_shop").value.trim(),
     contactNumber: document.getElementById("c_contactNumber").value.trim(),
     comment: document.getElementById("c_comment").value.trim(),
     company,
-    status: "available"
+    status: "available",
   };
 
-if (!isEditing) {
-  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-  if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
-  await addDoc(getCollectionByCompany(company), data);
-  alert("บันทึกเรียบร้อยแล้ว");
-} else {
-  const oldCompanyCollection = currentEditCollection;
-  const newCompanyCollection = getCollectionByCompany(company).path;
-
-  if (oldCompanyCollection !== newCompanyCollection) {
-    await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
     await addDoc(getCollectionByCompany(company), data);
+    alert("บันทึกเรียบร้อยแล้ว");
+    computerForm.reset();
   } else {
-    await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    const oldCompanyCollection = currentEditCollection;
+    const newCompanyCollection = getCollectionByCompany(company).path;
+
+    if (oldCompanyCollection !== newCompanyCollection) {
+      await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+      await addDoc(getCollectionByCompany(company), data);
+    } else {
+      await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    }
+
+    alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+    computerForm.reset();
+    isEditing = false;
+    currentEditId = null;
+    currentEditCollection = null;
+    computerForm.querySelector("button[type='submit']").textContent =
+      "บันทึกคอมพิวเตอร์";
   }
-
-  alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
-
-  isEditing = false;
-  currentEditId = null;
-  currentEditCollection = null;
-  computerForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
-}
-
 });
 
 // <---------- notebook ---------->
@@ -116,38 +122,42 @@ notebookForm.addEventListener("submit", async (e) => {
     model: document.getElementById("n_model").value.trim(),
     serialNumber: document.getElementById("n_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("n_purchaseDate").value),
-    warrantyExpire: toTimestamp(document.getElementById("n_warrantyExpire").value),
+    warrantyExpire: toTimestamp(
+      document.getElementById("n_warrantyExpire").value
+    ),
     warrantyPeriod: document.getElementById("n_warrantyPeriod").value.trim(),
     shop: document.getElementById("n_shop").value.trim(),
     contactNumber: document.getElementById("n_contactNumber").value.trim(),
     comment: document.getElementById("n_comment").value.trim(),
     company,
-    status: "available"
+    status: "available",
   };
 
-if (!isEditing) {
-  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-  if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
-  await addDoc(getCollectionByCompany(company), data);
-  alert("บันทึกเรียบร้อยแล้ว");
-} else {
-  const oldCompanyCollection = currentEditCollection;
-  const newCompanyCollection = getCollectionByCompany(company).path;
-
-  if (oldCompanyCollection !== newCompanyCollection) {
-    await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
     await addDoc(getCollectionByCompany(company), data);
+    alert("บันทึกเรียบร้อยแล้ว");
+    notebookForm.reset();
   } else {
-    await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    const oldCompanyCollection = currentEditCollection;
+    const newCompanyCollection = getCollectionByCompany(company).path;
+
+    if (oldCompanyCollection !== newCompanyCollection) {
+      await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+      await addDoc(getCollectionByCompany(company), data);
+    } else {
+      await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    }
+
+    alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+    notebookForm.reset();
+    isEditing = false;
+    currentEditId = null;
+    currentEditCollection = null;
+    notebookForm.querySelector("button[type='submit']").textContent =
+      "บันทึกคอมพิวเตอร์";
   }
-
-  alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
-
-  isEditing = false;
-  currentEditId = null;
-  currentEditCollection = null;
-  notebookForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
-}
 });
 
 // <---------- telephone ---------->
@@ -166,42 +176,45 @@ telephoneForm.addEventListener("submit", async (e) => {
     teleNumber: document.getElementById("t_teleNumber").value.trim(),
     serialNumber: document.getElementById("t_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("t_purchaseDate").value),
-    warrantyExpire: toTimestamp(document.getElementById("t_warrantyExpire").value),
+    warrantyExpire: toTimestamp(
+      document.getElementById("t_warrantyExpire").value
+    ),
     warrantyPeriod: document.getElementById("t_warrantyPeriod").value.trim(),
     shop: document.getElementById("t_shop").value.trim(),
     simais: document.getElementById("t_simais").value.trim(),
     contactNumber: document.getElementById("t_contactNumber").value.trim(),
     comment: document.getElementById("t_comment").value.trim(),
     company,
-    status: "available"
+    status: "available",
   };
 
-if (!isEditing) {
-  const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
-  if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
-  await addDoc(getCollectionByCompany(company), data);
-  alert("บันทึกเรียบร้อยแล้ว");
-} else {
-  const oldCompanyCollection = currentEditCollection;
-  const newCompanyCollection = getCollectionByCompany(company).path;
-
-  if (oldCompanyCollection !== newCompanyCollection) {
-    await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
     await addDoc(getCollectionByCompany(company), data);
+    alert("บันทึกเรียบร้อยแล้ว");
+    telephoneForm.reset();
   } else {
-    await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    const oldCompanyCollection = currentEditCollection;
+    const newCompanyCollection = getCollectionByCompany(company).path;
+
+    if (oldCompanyCollection !== newCompanyCollection) {
+      await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+      await addDoc(getCollectionByCompany(company), data);
+    } else {
+      await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    }
+
+    alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+    telephoneForm.reset();
+
+    isEditing = false;
+    currentEditId = null;
+    currentEditCollection = null;
+    telephoneForm.querySelector("button[type='submit']").textContent =
+      "บันทึกคอมพิวเตอร์";
   }
-
-  alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
-
-  isEditing = false;
-  currentEditId = null;
-  currentEditCollection = null;
-  telephoneForm.querySelector("button[type='submit']").textContent = "บันทึกคอมพิวเตอร์";
-}
-
 });
-
 
 //-------------------------------------------event listener--------------------------------------------------------
 
@@ -212,7 +225,14 @@ const filterDept = document.getElementById("filterDept");
 const filterAssetCode = document.getElementById("filterAssetCode");
 const filterbarCode = document.getElementById("filterbarCode");
 
-[filterCompany, filterType, filterName, filterDept, filterAssetCode, filterbarCode].forEach(el => el.addEventListener("input", loadFilteredData));
+[
+  filterCompany,
+  filterType,
+  filterName,
+  filterDept,
+  filterAssetCode,
+  filterbarCode,
+].forEach((el) => el.addEventListener("input", loadFilteredData));
 
 async function loadFilteredData() {
   const type = filterType.value;
@@ -222,7 +242,7 @@ async function loadFilteredData() {
   list.innerHTML = "";
 
   if (type === "notebook") {
-  thead.innerHTML = `
+    thead.innerHTML = `
     <th>ลำดับ</th>
     <th>BarCode</th>
     <th>รหัสทรัพย์สิน</th>
@@ -239,8 +259,8 @@ async function loadFilteredData() {
     <th>บริษัท</th>
     <th>หมายเหตุ</th>
     <th>จัดการ</th>`;
-} else if (type === "telephone") {
-  thead.innerHTML = `
+  } else if (type === "telephone") {
+    thead.innerHTML = `
     <th>ลำดับ</th>
     <th>BarCode</th>
     <th>รหัสทรัพย์สิน</th>
@@ -258,8 +278,8 @@ async function loadFilteredData() {
     <th>บริษัท</th>
     <th>หมายเหตุ</th>
     <th>จัดการ</th>`;
-} else {
-  thead.innerHTML = `
+  } else {
+    thead.innerHTML = `
     <th>ลำดับ</th>
     <th>BarCode</th>
     <th>รหัสทรัพย์สิน</th>
@@ -275,24 +295,45 @@ async function loadFilteredData() {
     <th>บริษัท</th>
     <th>หมายเหตุ</th>
     <th>จัดการ</th>`;
-}
+  }
 
-  const collectionsToSearch = company === "all" ? ["devices_swp", "devices_esk"] : [`devices_${company}`];
+  const collectionsToSearch =
+    company === "all" ? ["devices_swp", "devices_esk"] : [`devices_${company}`];
 
   let index = 1;
   for (const col of collectionsToSearch) {
     const snapshot = await getDocs(collection(db, col));
-    snapshot.forEach(docSnap => {
+    snapshot.forEach((docSnap) => {
       const d = docSnap.data();
       if (type !== "all" && d.type !== type) return;
 
-      if (filterbarCode.value && !d.barCode?.toLowerCase().includes(filterbarCode.value.toLowerCase())) return;
-      if (filterAssetCode.value && !d.assetCode?.toLowerCase().includes(filterAssetCode.value.toLowerCase())) return;
-      if (filterName.value && !d.name?.toLowerCase().includes(filterName.value.toLowerCase())) return;
-      if (filterDept.value && !d.department?.toLowerCase().includes(filterDept.value.toLowerCase())) return;
+      if (
+        filterbarCode.value &&
+        !d.barCode?.toLowerCase().includes(filterbarCode.value.toLowerCase())
+      )
+        return;
+      if (
+        filterAssetCode.value &&
+        !d.assetCode
+          ?.toLowerCase()
+          .includes(filterAssetCode.value.toLowerCase())
+      )
+        return;
+      if (
+        filterName.value &&
+        !d.name?.toLowerCase().includes(filterName.value.toLowerCase())
+      )
+        return;
+      if (
+        filterDept.value &&
+        !d.department?.toLowerCase().includes(filterDept.value.toLowerCase())
+      )
+        return;
 
-      const purchase = d.purchaseDate?.toDate().toLocaleDateString("th-TH") || "-";
-      const warranty = d.warrantyExpire?.toDate().toLocaleDateString("th-TH") || "-";
+      const purchase =
+        d.purchaseDate?.toDate().toLocaleDateString("th-TH") || "-";
+      const warranty =
+        d.warrantyExpire?.toDate().toLocaleDateString("th-TH") || "-";
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${index++}</td>
@@ -348,11 +389,15 @@ window.editItem = async (colName, docId) => {
     document.getElementById(`${prefix}_name`).value = d.name;
     document.getElementById(`${prefix}_deviceName`).value = d.deviceName;
     document.getElementById(`${prefix}_serialNumber`).value = d.serialNumber;
-    document.getElementById(`${prefix}_purchaseDate`).value = d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
-    document.getElementById(`${prefix}_warrantyExpire`).value = d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
-    document.getElementById(`${prefix}_warrantyPeriod`).value = d.warrantyPeriod || "";
+    document.getElementById(`${prefix}_purchaseDate`).value =
+      d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById(`${prefix}_warrantyExpire`).value =
+      d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById(`${prefix}_warrantyPeriod`).value =
+      d.warrantyPeriod || "";
     document.getElementById(`${prefix}_shop`).value = d.shop || "";
-    document.getElementById(`${prefix}_contactNumber`).value = d.contactNumber || "";
+    document.getElementById(`${prefix}_contactNumber`).value =
+      d.contactNumber || "";
     document.getElementById(`${prefix}_comment`).value = d.comment || "";
 
     if (d.type === "notebook") {
@@ -361,7 +406,6 @@ window.editItem = async (colName, docId) => {
 
     const form = d.type === "computer" ? computerForm : notebookForm;
     form.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
-
   } else if (d.type === "telephone") {
     document.getElementById("t_assetCode").value = d.assetCode;
     document.getElementById("t_name").value = d.name;
@@ -369,16 +413,17 @@ window.editItem = async (colName, docId) => {
     document.getElementById("t_netWork").value = d.netWork || "";
     document.getElementById("t_telNumber").value = d.teleNumber || "";
     document.getElementById("t_serialNumber").value = d.serialNumber;
-    document.getElementById("t_purchaseDate").value = d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
-    document.getElementById("t_warrantyExpire").value = d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById("t_purchaseDate").value =
+      d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById("t_warrantyExpire").value =
+      d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
     document.getElementById("t_warrantyPeriod").value = d.warrantyPeriod || "";
     document.getElementById("t_shop").value = d.shop || "";
     document.getElementById("t_simais").value = d.simais || "";
     document.getElementById("t_contactNumber").value = d.contactNumber || "";
     document.getElementById("t_comment").value = d.comment || "";
 
-    telephoneForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
+    telephoneForm.querySelector("button[type='submit']").textContent =
+      "อัปเดตข้อมูล";
   }
 };
-
-
