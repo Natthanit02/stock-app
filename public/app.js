@@ -18,6 +18,7 @@ const deviceTypeSelect = document.getElementById("deviceType");
 const computerForm = document.getElementById("computerForm");
 const notebookForm = document.getElementById("notebookForm");
 const telephoneForm = document.getElementById("telephoneForm");
+const printerForm = document.getElementById("printerForm");
 
 let isEditing = false;
 let currentEditId = null;
@@ -54,6 +55,8 @@ function toggleForms() {
     type === "notebook" && company ? "block" : "none";
   telephoneForm.style.display =
     type === "telephone" && company ? "block" : "none";
+  printerForm.style.display = 
+    type === "printer" && company ? "block" : "none";
 }
 
 //-------------------------------------------event listener--------------------------------------------------------
@@ -70,9 +73,7 @@ computerForm.addEventListener("submit", async (e) => {
     deviceName: document.getElementById("c_deviceName").value.trim(),
     serialNumber: document.getElementById("c_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("c_purchaseDate").value),
-    warrantyExpire: toTimestamp(
-      document.getElementById("c_warrantyExpire").value
-    ),
+    warrantyExpire: toTimestamp(document.getElementById("c_warrantyExpire").value),
     warrantyPeriod: document.getElementById("c_warrantyPeriod").value.trim(),
     shop: document.getElementById("c_shop").value.trim(),
     contactNumber: document.getElementById("c_contactNumber").value.trim(),
@@ -122,9 +123,7 @@ notebookForm.addEventListener("submit", async (e) => {
     model: document.getElementById("n_model").value.trim(),
     serialNumber: document.getElementById("n_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("n_purchaseDate").value),
-    warrantyExpire: toTimestamp(
-      document.getElementById("n_warrantyExpire").value
-    ),
+    warrantyExpire: toTimestamp(document.getElementById("n_warrantyExpire").value),
     warrantyPeriod: document.getElementById("n_warrantyPeriod").value.trim(),
     shop: document.getElementById("n_shop").value.trim(),
     contactNumber: document.getElementById("n_contactNumber").value.trim(),
@@ -176,9 +175,7 @@ telephoneForm.addEventListener("submit", async (e) => {
     teleNumber: document.getElementById("t_teleNumber").value.trim(),
     serialNumber: document.getElementById("t_serialNumber").value.trim(),
     purchaseDate: toTimestamp(document.getElementById("t_purchaseDate").value),
-    warrantyExpire: toTimestamp(
-      document.getElementById("t_warrantyExpire").value
-    ),
+    warrantyExpire: toTimestamp(document.getElementById("t_warrantyExpire").value),
     warrantyPeriod: document.getElementById("t_warrantyPeriod").value.trim(),
     shop: document.getElementById("t_shop").value.trim(),
     simais: document.getElementById("t_simais").value.trim(),
@@ -214,6 +211,57 @@ telephoneForm.addEventListener("submit", async (e) => {
     telephoneForm.querySelector("button[type='submit']").textContent =
       "บันทึกคอมพิวเตอร์";
   }
+});
+
+
+// <---------- printer ---------->
+printerForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const company = companySelect.value;
+  const data = {
+    type: "printer",
+    barCode: document.getElementById("p_barCode").value.trim(),
+    assetCode: document.getElementById("p_assetCode").value.trim(),
+    department: document.getElementById("p_department").value.trim(),
+    deviceName: document.getElementById("p_deviceName").value.trim(),
+    serialNumber: document.getElementById("p_serialNumber").value.trim(),
+    purchaseDate: toTimestamp(document.getElementById("p_purchaseDate").value),
+    warrantyExpire: toTimestamp(document.getElementById("p_warrantyExpire").value),
+    warrantyPeriod: document.getElementById("p_warrantyPeriod").value.trim(),
+    shop: document.getElementById("p_shop").value.trim(),
+    contactNumber: document.getElementById("p_contactNumber").value.trim(),
+    comment: document.getElementById("p_comment").value.trim(),
+    company,
+    status: "available"
+  };
+
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+    await addDoc(getCollectionByCompany(company), data);
+    alert("บันทึกเรียบร้อยแล้ว");
+    printerForm.reset();
+  } else {
+    const oldCompanyCollection = currentEditCollection;
+    const newCompanyCollection = getCollectionByCompany(company).path;
+
+    if (oldCompanyCollection !== newCompanyCollection) {
+      await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+      await addDoc(getCollectionByCompany(company), data);
+    } else {
+      await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    }
+
+    alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+    printerForm.reset();
+
+    isEditing = false;
+    currentEditId = null;
+    currentEditCollection = null;
+    printerForm.querySelector("button[type='submit']").textContent = "บันทึกเครื่องปริ้นเตอร์";
+  }
+
+  loadFilteredData();
 });
 
 //-------------------------------------------event listener--------------------------------------------------------
@@ -269,6 +317,22 @@ async function loadFilteredData() {
     <th>ชื่ออุปกรณ์</th>
     <th>เครือข่าย</th>
     <th>เบอร์โทร</th>
+    <th>SN</th>
+    <th>วันที่ซื้อ</th>
+    <th>วันหมดอายุประกัน</th>
+    <th>ประกัน/ปี</th>
+    <th>ซื้อจาก</th>
+    <th>เบอร์ติดต่อ</th>
+    <th>บริษัท</th>
+    <th>หมายเหตุ</th>
+    <th>จัดการ</th>`;
+  } else if (type === "printer") {
+  thead.innerHTML = `
+    <th>ลำดับ</th>
+    <th>BarCode</th>
+    <th>รหัสทรัพย์สิน</th>
+    <th>แผนก</th>
+    <th>ชื่ออุปกรณ์</th>
     <th>SN</th>
     <th>วันที่ซื้อ</th>
     <th>วันหมดอายุประกัน</th>
@@ -339,7 +403,7 @@ async function loadFilteredData() {
         <td>${index++}</td>
         <td>${d.barCode || "-"}</td>
         <td>${d.assetCode}</td>
-        <td>${d.name}</td>
+        ${type !== "printer" ? `<td>${d.name || "-"}</td>` : ""}
         <td>${d.department}</td>
         <td>${d.deviceName}</td>  
         ${type === "telephone" ? `<td>${d.netWork || "-"}</td>` : ""}
@@ -411,7 +475,7 @@ window.editItem = async (colName, docId) => {
     document.getElementById("t_name").value = d.name;
     document.getElementById("t_deviceName").value = d.deviceName;
     document.getElementById("t_netWork").value = d.netWork || "";
-    document.getElementById("t_telNumber").value = d.teleNumber || "";
+    document.getElementById("t_teleNumber").value = d.teleNumber || "";
     document.getElementById("t_serialNumber").value = d.serialNumber;
     document.getElementById("t_purchaseDate").value =
       d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
@@ -425,5 +489,18 @@ window.editItem = async (colName, docId) => {
 
     telephoneForm.querySelector("button[type='submit']").textContent =
       "อัปเดตข้อมูล";
+  } else if (d.type === "printer") {
+  document.getElementById("p_assetCode").value = d.assetCode;
+  document.getElementById("p_deviceName").value = d.deviceName;
+  document.getElementById("p_serialNumber").value = d.serialNumber;
+  document.getElementById("p_purchaseDate").value = d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
+  document.getElementById("p_warrantyExpire").value = d.warrantyExpire?.toDate().toISOString().split("T")[0] || "";
+  document.getElementById("p_warrantyPeriod").value = d.warrantyPeriod || "";
+  document.getElementById("p_shop").value = d.shop || "";
+  document.getElementById("p_contactNumber").value = d.contactNumber || "";
+  document.getElementById("p_comment").value = d.comment || "";
+
+  printerForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
   }
+
 };

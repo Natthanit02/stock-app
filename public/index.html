@@ -23,7 +23,8 @@
   <option value=""disabled selected>กรุณาเลือกประเภท</option>
   <option value="computer">คอมพิวเตอร์</option>
   <option value="notebook">โน้ตบุ๊ก</option>
-  <option value="telephone">โทรศัพท์</option> 
+  <option value="telephone">โทรศัพท์</option>
+  <option value="printer">ปริ้นเตอร์</option>  
 </select>
 
 <!-- ฟอร์มจะแสดงเมื่อเลือกบริษัท + ประเภท -->
@@ -85,6 +86,23 @@
   <button type="submit">บันทึกโทรศัพท์</button>
 </form>
 
+<!-- ปริ้นเตอร์ -->
+<form id="printerForm" style="display: none;">
+  <h3>ฟอร์มโทรศัพท์</h3>
+  <input type="text" id="p_barCode" placeholder="Barcode">
+  <input type="text" id="p_assetCode" placeholder="รหัสทรัพย์สิน">
+  <input type="text" id="p_department" placeholder="แผนก">
+  <input type="text" id="p_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="p_serialNumber" placeholder="SN">
+  <input type="date" id="p_purchaseDate">
+  <input type="date" id="p_warrantyExpire">
+  <input type="text" id="p_warrantyPeriod" placeholder="ประกัน">
+  <input type="text" id="p_shop" placeholder="ซื้อจาก">
+  <input type="text" id="p_contactNumber" placeholder="เบอร์ติดต่อ">
+  <input type="text" id="p_comment" placeholder="หมายเหตุ">
+  <button type="submit">บันทึกโทรศัพท์</button>
+</form>
+
 <hr>
 <h3>รายการอุปกรณ์</h3>
 
@@ -102,6 +120,7 @@
   <option value="computer">คอมพิวเตอร์</option>
   <option value="notebook">โน้ตบุ๊ก</option>
   <option value="telephone">โทรศัพท์</option>
+  <option value="printer">ปริ้นเตอร์</option>
 </select>
 
 <label for="filterbarCode">ค้นหา BarCode:</label>
