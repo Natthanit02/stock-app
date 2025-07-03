@@ -24,7 +24,8 @@
   <option value="computer">คอมพิวเตอร์</option>
   <option value="notebook">โน้ตบุ๊ก</option>
   <option value="telephone">โทรศัพท์</option>
-  <option value="printer">ปริ้นเตอร์</option>  
+  <option value="printer">ปริ้นเตอร์</option> 
+  <option value="router">เราเตอร์</option> 
 </select>
 
 <!-- ฟอร์มจะแสดงเมื่อเลือกบริษัท + ประเภท -->
@@ -103,6 +104,23 @@
   <button type="submit">บันทึกโทรศัพท์</button>
 </form>
 
+<!-- ฟอร์ม Router -->
+<form id="routerForm" style="display: none;">
+  <h3>ฟอร์ม Router</h3>
+  <input type="text" id="r_barCode" placeholder="Barcode">
+  <input type="text" id="r_assetCode" placeholder="รหัสทรัพย์สิน">
+  <input type="text" id="r_department" placeholder="แผนก">
+  <input type="text" id="r_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="r_serialNumber" placeholder="SN">
+  <input type="date" id="r_purchaseDate">
+  <input type="text" id="r_warrantyPeriod" placeholder="ประกัน">
+  <input type="text" id="r_shop" placeholder="ซื้อจาก">
+  <input type="text" id="r_contactNumber" placeholder="เบอร์ติดต่อ">
+  <input type="text" id="r_comment" placeholder="หมายเหตุ">
+  <button type="submit">บันทึก Router</button>
+</form>
+
+
 <hr>
 <h3>รายการอุปกรณ์</h3>
 
@@ -121,6 +139,7 @@
   <option value="notebook">โน้ตบุ๊ก</option>
   <option value="telephone">โทรศัพท์</option>
   <option value="printer">ปริ้นเตอร์</option>
+  <option value="router">เราเตอร์</option>
 </select>
 
 <label for="filterbarCode">ค้นหา BarCode:</label>
