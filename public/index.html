@@ -26,6 +26,7 @@
   <option value="telephone">โทรศัพท์</option>
   <option value="printer">ปริ้นเตอร์</option> 
   <option value="router">เราเตอร์</option> 
+  <option value="switch">สวิทชิ่ง</option> 
 </select>
 
 <!-- ฟอร์มจะแสดงเมื่อเลือกบริษัท + ประเภท -->
@@ -120,6 +121,21 @@
   <button type="submit">บันทึก Router</button>
 </form>
 
+<form id="switchForm" style="display: none;">
+  <h3>ฟอร์ม Switch</h3>
+  <input type="text" id="s_barCode" placeholder="Barcode">
+  <input type="text" id="s_assetCode" placeholder="รหัสทรัพย์สิน">
+  <input type="text" id="s_department" placeholder="แผนก">
+  <input type="text" id="s_deviceName" placeholder="ชื่ออุปกรณ์">
+  <input type="text" id="s_serialNumber" placeholder="SN">
+  <input type="date" id="s_purchaseDate" type="date">
+  <input type="text" id="s_warrantyPeriod" placeholder="ประกัน">
+  <input type="text" id="s_shop" placeholder="ซื้อจาก">
+  <input type="text" id="s_contactNumber" placeholder="เบอร์ติดต่อ">
+  <input type="text" id="s_comment" placeholder="หมายเหตุ">
+  <button type="submit">บันทึก Switch</button>
+</form>
+
 
 <hr>
 <h3>รายการอุปกรณ์</h3>
@@ -140,6 +156,7 @@
   <option value="telephone">โทรศัพท์</option>
   <option value="printer">ปริ้นเตอร์</option>
   <option value="router">เราเตอร์</option>
+  <option value="switch">สวิทชิ่ง</option> 
 </select>
 
 <label for="filterbarCode">ค้นหา BarCode:</label>

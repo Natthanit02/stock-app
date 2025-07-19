@@ -20,6 +20,7 @@ const notebookForm = document.getElementById("notebookForm");
 const telephoneForm = document.getElementById("telephoneForm");
 const printerForm = document.getElementById("printerForm");
 const routerForm = document.getElementById("routerForm");
+const switchForm = document.getElementById("switchForm");
 
 let isEditing = false;
 let currentEditId = null;
@@ -60,6 +61,8 @@ function toggleForms() {
     type === "printer" && company ? "block" : "none";
   routerForm.style.display = 
     type === "router" && company ? "block" : "none";
+  switchForm.style.display = 
+    type === "switch" && company ? "block" : "none";
 
 }
 
@@ -315,6 +318,57 @@ routerForm.addEventListener("submit", async (e) => {
   loadFilteredData();
 });
 
+// <---------- switch ---------->
+switchForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const company = companySelect.value;
+
+  const data = {
+    type: "switch",
+    barCode: document.getElementById("s_barCode").value.trim(),
+    assetCode: document.getElementById("s_assetCode").value.trim(),
+    department: document.getElementById("s_department").value.trim(),
+    deviceName: document.getElementById("s_deviceName").value.trim(),
+    serialNumber: document.getElementById("s_serialNumber").value.trim(),
+    purchaseDate: toTimestamp(document.getElementById("s_purchaseDate").value),
+    warrantyPeriod: document.getElementById("s_warrantyPeriod").value.trim(),
+    shop: document.getElementById("s_shop").value.trim(),
+    contactNumber: document.getElementById("s_contactNumber").value.trim(),
+    comment: document.getElementById("s_comment").value.trim(),
+    company,
+    status: "available"
+  };
+
+  if (!isEditing) {
+    const isDuplicate = await checkDuplicateAssetCode(company, data.assetCode);
+    if (isDuplicate) return alert("รหัสทรัพย์สินนี้มีอยู่ในระบบแล้ว");
+    await addDoc(getCollectionByCompany(company), data);
+    alert("บันทึกเรียบร้อยแล้ว");
+    switchForm.reset();
+  } else {
+    const oldCompanyCollection = currentEditCollection;
+    const newCompanyCollection = getCollectionByCompany(company).path;
+
+    if (oldCompanyCollection !== newCompanyCollection) {
+      await deleteDoc(doc(db, oldCompanyCollection, currentEditId));
+      await addDoc(getCollectionByCompany(company), data);
+    } else {
+      await updateDoc(doc(db, oldCompanyCollection, currentEditId), data);
+    }
+
+    alert("อัปเดตข้อมูลเรียบร้อยแล้ว");
+    switchForm.reset();
+
+    isEditing = false;
+    currentEditId = null;
+    currentEditCollection = null;
+    switchForm.querySelector("button[type='submit']").textContent = "บันทึก Switch";
+  }
+
+  loadFilteredData();
+});
+
+
 
 //-------------------------------------------event listener--------------------------------------------------------
 
@@ -409,7 +463,22 @@ async function loadFilteredData() {
     <th>บริษัท</th>
     <th>หมายเหตุ</th>
     <th>จัดการ</th>`;
-  } else {
+  } else if (type === "switch") {
+  thead.innerHTML = `
+    <th>ลำดับ</th>
+    <th>BarCode</th>
+    <th>รหัสทรัพย์สิน</th>
+    <th>แผนก</th>
+    <th>ชื่ออุปกรณ์</th>
+    <th>SN</th>
+    <th>วันที่ซื้อ</th>
+    <th>ประกัน</th>
+    <th>ซื้อจาก</th>
+    <th>เบอร์ติดต่อ</th>
+    <th>บริษัท</th>
+    <th>หมายเหตุ</th>
+    <th>จัดการ</th>`;
+  }else {
     thead.innerHTML = `
     <th>ลำดับ</th>
     <th>BarCode</th>
@@ -478,7 +547,7 @@ async function loadFilteredData() {
         ${type === "notebook" ? `<td>${d.model || "-"}</td>` : ""}
         <td>${d.serialNumber || "-"}</td>
         <td>${purchase}</td>
-        ${["computer", "notebook", "telephone", "printer"].includes(type) ? `<td>${d.warrantyPeriod || "-"}</td>` : type === "router" ? "" : ""}
+        ${["computer", "notebook", "telephone", "printer"].includes(type) ? `<td>${d.warrantyExpire ? d.warrantyExpire.toDate().toLocaleDateString("th-TH") : "-"}</td>` : ""}
         <td>${d.warrantyPeriod || "-"}</td>
         <td>${d.shop || "-"}</td>
         <td>${d.contactNumber || "-"}</td>
@@ -583,7 +652,20 @@ window.editItem = async (colName, docId) => {
   document.getElementById("r_comment").value = d.comment || "";
 
   routerForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
-}
+  } else if (d.type === "switch") {
+    document.getElementById("s_barCode").value = d.barCode || "";
+    document.getElementById("s_assetCode").value = d.assetCode;
+    document.getElementById("s_deviceName").value = d.deviceName;
+    document.getElementById("s_department").value = d.department;
+    document.getElementById("s_serialNumber").value = d.serialNumber;
+    document.getElementById("s_purchaseDate").value = d.purchaseDate?.toDate().toISOString().split("T")[0] || "";
+    document.getElementById("s_warrantyPeriod").value = d.warrantyPeriod || "";
+    document.getElementById("s_shop").value = d.shop || "";
+    document.getElementById("s_contactNumber").value = d.contactNumber || "";
+    document.getElementById("s_comment").value = d.comment || "";
+
+    switchForm.querySelector("button[type='submit']").textContent = "อัปเดตข้อมูล";
+  }
 
 };
 
@@ -596,6 +678,7 @@ function setDefaultTodayDate() {
   document.getElementById("t_purchaseDate").value = today;
   document.getElementById("p_purchaseDate").value = today;
   document.getElementById("r_purchaseDate").value = today;
+  document.getElementById("s_purchaseDate").value = today;
 }
 
 // เรียกใช้งานเมื่อล็อดเพจ
